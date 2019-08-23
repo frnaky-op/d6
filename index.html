@@ -1,0 +1,89 @@
+
+<?PHP
+$path = "upload/"; // créer le dossier upload
+$url='upload/image1.jpg' ; // ajouter dans le dossier upload un fichier image1.jpg par défaut.
+
+  if(!empty($_FILES['uploaded_file']))
+  {
+       $path = $path . basename( $_FILES['uploaded_file']['name']);
+    if(move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $path)) {
+      $url="upload/".basename( $_FILES['uploaded_file']['name']);
+    } else{
+        echo "There was an error uploading the file, please try again!";
+    }
+  }
+?>
+  
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Speed Test</title>
+  <style>
+        .div1 {width:600px;height:400px;  border:solid 1px black;}
+        .div2 {width:600px;height:100px; border:solid 1px black;}
+        .para {width:600px;height:500px; position:relative;margin:20px;}
+        .rst {width:400px;height:500px;position:relative; top:-520px ; left:660px; overflow:auto;}
+        img {width:100% ; height:100%}
+  </style>
+</head>
+<body>
+<div class="para">
+<div class="div1">
+<img src='<?php  echo $url; ?>' />
+</div>
+<div class="div2">
+  <form enctype="multipart/form-data" action="index.php" method="POST">
+    <p>Choose your file:
+    <input type="file" name="uploaded_file" />
+    <input type="submit" value="Upload" />
+  </form>
+</div>
+</div>
+</body>
+</html>
+<?php
+ //var_dump(getColorPallet($url));    
+ echoColors(getColorPallet($url));    
+      
+ function echoColors($pallet){ // OUTPUT COLORSBAR
+    $rst ='<div class="rst"><h3>Result</h3>';
+     foreach ($pallet as $key=>$val)
+     $rst .= '<div  style="width:100% ; height:50px;background:#'.$val.'">#'.$val.'</div>';
+     $rst .= '</div>';
+     echo $rst;
+ }
+ 
+ function getColorPallet($imageURL, $palletSize=[16,8]){ // GET PALLET FROM IMAGE PLAY WITH INPUT PALLET SIZE
+     // SIMPLE CHECK INPUT VALUES
+     if(!$imageURL) return false;
+ 
+     // IN THIS EXEMPLE WE CREATE PALLET FROM JPG IMAGE
+     $img = imagecreatefromjpeg($imageURL);
+ 
+     // SCALE DOWN IMAGE
+     $imgSizes=getimagesize($imageURL);
+ 
+     $resizedImg=imagecreatetruecolor($palletSize[0],$palletSize[1]);
+ 
+     imagecopyresized($resizedImg, $img , 0, 0 , 0, 0, $palletSize[0], $palletSize[1], $imgSizes[0], $imgSizes[1]);
+ 
+     imagedestroy($img);
+ 
+     //GET COLORS IN ARRAY
+     $colors=[];
+  
+     for($j=0;$j<3;$j++) {
+        $line =rand(1,$palletSize[1]-1) ;
+        $colors[]=dechex(imagecolorat($resizedImg,$j, $line));
+     }
+             
+ 
+     imagedestroy($resizedImg);
+ 
+     //REMOVE DUPLICATES
+     $colors= array_unique($colors);
+ 
+     return $colors;
+ 
+ }
+?>
